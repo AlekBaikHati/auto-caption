@@ -2,7 +2,7 @@ from telethon import TelegramClient, events
 import asyncio
 import logging
 import os
-from http_server import start_http_server  # Impor fungsi dari file http_server.py
+from aiohttp import web
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
@@ -18,15 +18,39 @@ bot_token = os.getenv('BOT_TOKEN')
 # Dictionary untuk menyimpan caption per chat
 user_captions = {}
 
+class HTTPServer:
+    def __init__(self, host: str, port: int):
+        self.app = web.Application()
+        self.host = host
+        self.port = port
+        self.app.router.add_get('/', self.health_check)
+
+    async def health_check(self, request):
+        return web.Response(text="OK")
+
+    async def run_server(self):
+        runner = web.AppRunner(self.app)
+        await runner.setup()
+        site = web.TCPSite(runner, self.host, self.port)
+        await site.start()
+        logger.info("HTTP server is running...")
+
 async def main():
     logger.info("Starting HTTP server...")
-    asyncio.create_task(start_http_server())  # Jalankan server HTTP sebagai task
+    http_server = HTTPServer(host='0.0.0.0', port=int(os.getenv('PORT', 8080)))
+    asyncio.create_task(http_server.run_server())  # Jalankan server HTTP sebagai task
 
     logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
-        await client.start(bot_token=bot_token)  # Gunakan token bot dari variabel lingkungan
+        await client.start(bot_token=bot_token)
         logger.info("Bot connected to Telegram.")
         logger.info("Bot is ready to receive messages.")
+
+        # Matikan server HTTP setelah bot terhubung
+        logger.info("Stopping HTTP server...")
+        await asyncio.sleep(1)  # Tunggu sebentar sebelum mematikan server
+
+        # Anda bisa menambahkan logika untuk mematikan server di sini jika perlu
 
         @client.on(events.NewMessage)
         async def handler(event):
