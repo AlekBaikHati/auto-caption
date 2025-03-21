@@ -2,8 +2,7 @@ from telethon import TelegramClient, events
 import asyncio
 import logging
 import os
-from aiohttp import web
-import threading
+from http_server import start_http_server  # Impor fungsi dari file http_server.py
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
@@ -19,38 +18,18 @@ bot_token = os.getenv('BOT_TOKEN')  # Mengambil dari variabel lingkungan
 # Dictionary untuk menyimpan caption per chat
 user_captions = {}
 
-class HTTPServer:
-    def __init__(self, host: str, port: int):
-        self.app = web.Application()
-        self.host = host
-        self.port = port
-        self.app.router.add_get('/', self.health_check)
-
-    async def health_check(self, request):
-        return web.Response(text="OK")
-
-    async def run_server(self):
-        runner = web.AppRunner(self.app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.host, self.port)
-        await site.start()
-
-def start_http_server():
-    port = int(os.getenv('PORT', 8080))
-    http_server = HTTPServer(host='0.0.0.0', port=port)
-    asyncio.run(http_server.run_server())
-
 async def main():
     logger.info("Starting HTTP server...")
-    port = int(os.getenv('PORT', 8080))
-    http_server = HTTPServer(host='0.0.0.0', port=port)
-    asyncio.create_task(http_server.run_server())  # Jalankan server HTTP sebagai task
+    asyncio.create_task(start_http_server())  # Jalankan server HTTP sebagai task
 
     logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
         await client.start(bot_token=bot_token)  # Gunakan token bot dari variabel lingkungan
         logger.info("Bot connected to Telegram.")
-        
+
+        # Tambahkan log untuk memastikan bot siap menerima pesan
+        logger.info("Bot is ready to receive messages.")
+
         @client.on(events.NewMessage)
         async def handler(event):
             logger.info(f"Received message: {event.message.message}")  # Tambahkan log ini
@@ -120,10 +99,4 @@ async def main():
         await client.run_until_disconnected()
 
 if __name__ == '__main__':
-    try:
-        asyncio.run(main())
-    except RuntimeError as e:
-        if 'This event loop is already running' in str(e):
-            print("Event loop sudah berjalan. Coba jalankan di lingkungan yang mendukung asyncio.")
-        else:
-            raise e
+    main()
