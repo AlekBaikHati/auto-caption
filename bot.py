@@ -35,12 +35,15 @@ class HTTPServer:
         await site.start()
 
 async def main():
+    logger.info("Starting HTTP server...")
     # Menjalankan server HTTP
-    port = int(os.getenv('PORT', 8080))  # Ambil port dari variabel lingkungan
+    port = int(os.getenv('PORT', 8080))
     http_server = HTTPServer(host='0.0.0.0', port=port)
     asyncio.create_task(http_server.run_server())
 
+    logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
+        logger.info("Bot connected to Telegram.")
         @client.on(events.NewMessage)
         async def handler(event):
             # Mendapatkan file yang diterima
