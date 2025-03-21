@@ -2,6 +2,7 @@ from telethon import TelegramClient, events
 import asyncio
 import logging
 import os
+from aiohttp import web
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +18,28 @@ bot_token = os.getenv('BOT_TOKEN')  # Mengambil dari variabel lingkungan
 # Dictionary untuk menyimpan caption per chat
 user_captions = {}
 
+class HTTPServer:
+    def __init__(self, host: str, port: int):
+        self.app = web.Application()
+        self.host = host
+        self.port = port
+        self.app.router.add_get('/', self.health_check)
+
+    async def health_check(self, request):
+        return web.Response(text="OK")
+
+    async def run_server(self):
+        runner = web.AppRunner(self.app)
+        await runner.setup()
+        site = web.TCPSite(runner, self.host, self.port)
+        await site.start()
+
 async def main():
+    # Menjalankan server HTTP
+    port = int(os.getenv('PORT', 8080))  # Ambil port dari variabel lingkungan
+    http_server = HTTPServer(host='0.0.0.0', port=port)
+    asyncio.create_task(http_server.run_server())
+
     async with TelegramClient('bot', api_id, api_hash) as client:
         @client.on(events.NewMessage)
         async def handler(event):
@@ -63,6 +85,7 @@ async def main():
             preview_caption = user_caption.replace("{ori_caption}", "Caption Asli")  # Ganti dengan placeholder
             await event.reply(f"Caption diterima:\n{caption_diterima}", disable_web_page_preview=True)
             await event.reply(f"Preview Caption:\n{preview_caption}", parse_mode='html')
+
         @client.on(events.NewMessage(pattern='/help'))
         async def help_command(event):
             help_text = (

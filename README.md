@@ -6,7 +6,7 @@ Bot ini menggunakan Telethon untuk berinteraksi dengan API Telegram.
 
 Anda dapat dengan mudah mendepoy bot ini ke Koyeb dengan mengklik tombol di bawah ini:
 
-[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/services/deploy?type=git&repository=github.com/AlekBaikHati/auto-caption&branch=main&builder=dockerfile&env%5BAPI_ID%5D=api_id&env%5BAPI_HASH%5D=api_hash&env%5BBOT_TOKEN%5D=bot_token)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/services/deploy?type=git&repository=github.com/AlekBaikHati/REPO_NAME&branch=main&builder=dockerfile&env%5BAPI_ID%5D=api_id&env%5BAPI_HASH%5D=api_hash&env%5BBOT_TOKEN%5D=bot_token)
 
 Gantilah `USERNAME` dan `REPO_NAME` dengan nama pengguna dan nama repositori GitHub Anda.
 
