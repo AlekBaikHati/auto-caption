@@ -43,13 +43,12 @@ async def main():
 
     logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
+        await client.start(bot_token=bot_token)  # Gunakan token bot dari variabel lingkungan
         logger.info("Bot connected to Telegram.")
         
-        # Tambahkan token bot di sini
-        await client.start(bot_token=bot_token)  # Gunakan token bot dari variabel lingkungan
-
         @client.on(events.NewMessage)
         async def handler(event):
+            logger.info(f"Received message: {event.message.message}")  # Tambahkan log ini
             # Mendapatkan file yang diterima
             if event.video:
                 file_name = f"video_{event.video.id}.mp4"  # Menggunakan ID video sebagai nama file
