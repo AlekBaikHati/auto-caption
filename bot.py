@@ -44,6 +44,10 @@ async def main():
     logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
         logger.info("Bot connected to Telegram.")
+        
+        # Tambahkan token bot di sini
+        await client.start(bot_token=bot_token)  # Gunakan token bot dari variabel lingkungan
+
         @client.on(events.NewMessage)
         async def handler(event):
             # Mendapatkan file yang diterima
