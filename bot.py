@@ -3,6 +3,7 @@ import asyncio
 import logging
 import os
 from aiohttp import web
+import threading
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
@@ -34,12 +35,16 @@ class HTTPServer:
         site = web.TCPSite(runner, self.host, self.port)
         await site.start()
 
-async def main():
-    logger.info("Starting HTTP server...")
-    # Menjalankan server HTTP
+def start_http_server():
     port = int(os.getenv('PORT', 8080))
     http_server = HTTPServer(host='0.0.0.0', port=port)
-    asyncio.create_task(http_server.run_server())
+    asyncio.run(http_server.run_server())
+
+async def main():
+    logger.info("Starting HTTP server...")
+    port = int(os.getenv('PORT', 8080))
+    http_server = HTTPServer(host='0.0.0.0', port=port)
+    asyncio.create_task(http_server.run_server())  # Jalankan server HTTP sebagai task
 
     logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
