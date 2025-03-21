@@ -18,22 +18,6 @@ bot_token = os.getenv('BOT_TOKEN')
 # Dictionary untuk menyimpan caption per chat
 user_captions = {}
 
-class HTTPServer:
-    def __init__(self, host: str, port: int):
-        self.app = web.Application()
-        self.host = host
-        self.port = port
-        self.app.router.add_get('/', self.health_check)
-
-    async def health_check(self, request):
-        return web.Response(text="OK")
-
-    async def run_server(self):
-        runner = web.AppRunner(self.app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.host, self.port)
-        await site.start()
-
 async def main():
     logger.info("Starting HTTP server...")
     asyncio.create_task(start_http_server())  # Jalankan server HTTP sebagai task
