@@ -2,55 +2,27 @@ from telethon import TelegramClient, events
 import asyncio
 import logging
 import os
-from aiohttp import web
 
 # Konfigurasi logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Ganti dengan API ID dan API Hash Anda
-api_id = os.getenv('API_ID')
-api_hash = os.getenv('API_HASH')
+api_id = os.getenv('API_ID')  # Mengambil dari variabel lingkungan
+api_hash = os.getenv('API_HASH')  # Mengambil dari variabel lingkungan
 
 # Ganti dengan token bot Anda
-bot_token = os.getenv('BOT_TOKEN')
+bot_token = os.getenv('BOT_TOKEN')  # Mengambil dari variabel lingkungan
 
 # Dictionary untuk menyimpan caption per chat
 user_captions = {}
 
-class HTTPServer:
-    def __init__(self, host: str, port: int):
-        self.app = web.Application()
-        self.host = host
-        self.port = port
-        self.app.router.add_get('/', self.health_check)
-
-    async def health_check(self, request):
-        return web.Response(text="OK")
-
-    async def run_server(self):
-        runner = web.AppRunner(self.app)
-        await runner.setup()
-        site = web.TCPSite(runner, self.host, self.port)
-        await site.start()
-        logger.info("HTTP server is running...")
-
 async def main():
-    logger.info("Starting HTTP server...")
-    http_server = HTTPServer(host='0.0.0.0', port=int(os.getenv('PORT', 8080)))
-    asyncio.create_task(http_server.run_server())  # Jalankan server HTTP sebagai task
-
     logger.info("Connecting to Telegram...")
     async with TelegramClient('bot', api_id, api_hash) as client:
-        await client.start(bot_token=bot_token)
+        await client.start(bot_token=bot_token)  # Gunakan token bot dari variabel lingkungan
         logger.info("Bot connected to Telegram.")
         logger.info("Bot is ready to receive messages.")
-
-        # Matikan server HTTP setelah bot terhubung
-        logger.info("Stopping HTTP server...")
-        await asyncio.sleep(1)  # Tunggu sebentar sebelum mematikan server
-
-        # Anda bisa menambahkan logika untuk mematikan server di sini jika perlu
 
         @client.on(events.NewMessage)
         async def handler(event):
